@@ -7,8 +7,59 @@ const filterInput = document.querySelector("#filter");
 const clearbutton = document.querySelector("#clear-todos");
 
 allEvents();
+
 function allEvents() {
   todoForm.addEventListener("submit", addTodo);
+  document.addEventListener("DOMContentLoaded", loadTodosToUI);
+  cardbodys.addEventListener("click", deleteTodo);
+  filterInput.addEventListener("keyup", filterTodos);
+  clearbutton.addEventListener("click", clearTodos);
+}
+function clearTodos() {
+  if (confirm("tüm todolar silinsin mi?")) {
+    // todolist[0].remove(); NEDEN ÇALIŞMIYOR ANLAMADIM.
+    while (todolist.firstElementChild != null) {
+      todolist.removeChild(todolist.firstElementChild).remove();
+    }
+    localStorage.removeItem("todos");
+  }
+}
+
+function filterTodos(e) {
+  const filterValue = e.target.value.toLowerCase();
+  const listItems = document.querySelectorAll(".list-group-item");
+  listItems.forEach(function (listItem) {
+    const text = listItem.textContent.toLowerCase();
+    if (text.indexOf(filterValue) === -1) {
+      //içinde harfleri bulamadı
+      listItem.setAttribute("style", "display:none !important");
+    } else {
+      listItem.setAttribute("style", "display:block !important");
+    }
+  });
+}
+function deleteTodo(e) {
+  if (e.target.className === "fa fa-remove") {
+    e.target.parentElement.parentElement.remove();
+    deleteTodoFromStorage(e.target.parentElement.parentElement.textContent);
+    showAlert("success", "todo silindi.");
+  }
+}
+function deleteTodoFromStorage(deletetodo) {
+  let todos = getTodosFromStorage();
+  todos.forEach(function (todo, index) {
+    //foreach metoduyla indexte bulabiliriz.
+    if (todo === deletetodo) {
+      todos.splice(index, 1); //array içinden veri silmek için splice metodu kullanırız, o indexten itibaren 1 veri sil anlamında.
+      localStorage.setItem("todos", JSON.stringify(todos)); //yeni todos arrayini local storage a gönderiyoruz.
+    }
+  });
+}
+function loadTodosToUI() {
+  let todos = getTodosFromStorage();
+  todos.forEach(function (todo) {
+    addTodotoUI(todo);
+  });
 }
 
 function addTodo(e) {
